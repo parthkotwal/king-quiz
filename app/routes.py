@@ -1,8 +1,21 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template
 from app import db
-from app.models import Question, Choice, Committee
+from app.models import Question, Choice, Committee, Submission
 
 routes = Blueprint('routes', __name__)
+
+@routes.route('/')
+def index():
+    return render_template('index.html')
+
+@routes.route('/quiz', methods=['GET'])
+def quiz():
+    return render_template('quiz.html')
+
+@routes.route('/result', methods=['GET'])
+def results():
+    return render_template('results.html')
+
 
 @routes.route('/api/questions', methods=['GET'])
 def get_questions():
@@ -35,11 +48,12 @@ def delete_question(question_id:int):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
-    
+
 @routes.route('/api/submit', methods=['POST'])
 def submit_responses():
     data = request.json
     choice_ids = data.get('choice_ids',[])
+    user_identifier = data.get('user_identifier', "Anonymous")
     if not choice_ids or not isinstance(choice_ids, list):
         return {"error": "Invalid input. 'choice_ids' must be a list."},400
     
@@ -73,4 +87,11 @@ def submit_responses():
                 "topic_2": details.topic2
             }
 
-    return {"committee_info": infos}, 200
+    submission = Submission(
+        user_identifier=user_identifier,
+        choices=choice_ids,
+        results=infos
+    )
+    db.session.add(submission)
+    db.session.commit()
+    return {"committee_info":infos, "submission_id":submission.id}, 200

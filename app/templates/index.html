@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+<div class="landing-page">
+    <h2>Find Your Perfect Committee</h2>
+    <p>Take this quiz to discover the best committee for you at KingMUN.</p>
+    <button onclick="window.location.href='{{ url_for('routes.quiz') }}'">Start Quiz</button>
+</div>
+{% endblock %}
