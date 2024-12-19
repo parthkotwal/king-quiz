@@ -29,7 +29,7 @@ def get_questions():
             'choices': [{'id':choice.id, 'text':choice.text} for choice in choices]
         })
 
-    return jsonify(responses)
+    return jsonify({'questions':responses})
 
 @routes.route('/api/question/<int:question_id>', methods=['DELETE'])
 def delete_question(question_id:int):
@@ -52,46 +52,75 @@ def delete_question(question_id:int):
 @routes.route('/api/submit', methods=['POST'])
 def submit_responses():
     data = request.json
-    choice_ids = data.get('choice_ids',[])
+    choice_ids = data.get('choice_ids', [])
     user_identifier = data.get('user_identifier', "Anonymous")
+
     if not choice_ids or not isinstance(choice_ids, list):
-        return {"error": "Invalid input. 'choice_ids' must be a list."},400
-    
+        return {"error": "Invalid input. 'choice_ids' must be a list."}, 400
+
     choices = Choice.query.filter(Choice.id.in_(choice_ids)).all()
     weights = {}
     for choice in choices:
         for committee, weight in choice.weights.items():
-            weights[committee] = weight+weights.get(committee,0)
-    sorted_weights = sorted(weights.items(),reverse=True, key=lambda x: x[1])
+            weights[committee] = weights.get(committee, 0) + weight
+
+    sorted_weights = sorted(weights.items(), reverse=True, key=lambda x: x[1])
     total = sum(weights.values())
-    top3 = [{ 
-        "committee": committee, "weight": weight, 
-        "percentage": round((weight / total) * 100, 2) if total > 0 else 0 
-        } for committee, weight in sorted_weights[:3]]
+    top3_committees = [
+        {
+            "committee": committee,
+            "weight": weight,
+            "percentage": round((weight / total) * 100, 2) if total > 0 else 0,
+        }
+        for committee, weight in sorted_weights[:3]
+    ]
+    committee_names = [c["committee"] for c in top3_committees]
+    committees = Committee.query.filter(Committee.name.in_(committee_names)).all()
 
     infos = {}
-    for comm in top3:
-        name = comm["committee"]
-        weight = comm["weight"]
-        percentage = comm["percentage"]
-
-        details = Committee.query.filter_by(name).first()
-        if details:
-            infos[name] = {
-                "weight": weight,
-                "percentage": percentage,
-                "link": details.link,
-                "image_url": details.image_url,
-                "difficulty_level": details.difficulty_level,
-                "topic_1": details.topic1,
-                "topic_2": details.topic2
-            }
-
+    for comm in committees:
+        infos[comm.name] = {
+            "weight": next((c["weight"] for c in top3_committees if c["committee"] == comm.name), 0),
+            "percentage": next((c["percentage"] for c in top3_committees if c["committee"] == comm.name), 0),
+            "link": comm.link,
+            "image_url": comm.image_url,
+            "difficulty_level": comm.difficulty_level,
+            "topics": [comm.topic_1, comm.topic_2],
+        }
     submission = Submission(
         user_identifier=user_identifier,
         choices=choice_ids,
-        results=infos
+        results=infos,
     )
     db.session.add(submission)
     db.session.commit()
-    return {"committee_info":infos, "submission_id":submission.id}, 200
+
+    return {"committee_info": infos, "submission_id": submission.id}, 200
+
+
+@routes.route('/api/results', methods=['GET'])
+def get_results():
+    submission_id = request.args.get('submission_id')
+    submission = Submission.query.get(submission_id)
+
+    if not submission:
+        return jsonify({'error': 'Submission not found'}), 404
+
+    results = sorted(
+        submission.scores.items(),
+        key=lambda item: item[1],
+        reverse=True
+    )
+
+    response = []
+    for committee, score in results[:3]:  # Top 3 committees
+        committee_obj = Committee.query.filter_by(name=committee).first()
+        response.append({
+            'committee_name': committee_obj.name,
+            'percentage': round(score / sum(submission.scores.values()) * 100, 2),
+            'difficulty': committee_obj.difficulty,
+            'topics': committee_obj.topics,
+            'link': committee_obj.link
+        })
+
+    return jsonify({'results': response})

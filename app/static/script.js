@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const questionsContainer = document.getElementById('questions-container');
-    const form = document.getElementById('quiz-form');
+    const questionsContainer = document.getElementById('questions-container')
+    const form = document.getElementById('form')
 
     fetch('/api/questions')
         .then(response => response.json())
@@ -28,19 +28,41 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-    form.addEventListener('submit', event => {
-        event.preventDefault();
-        const formData = new FormData(form);
-        const choiceIds = Array.from(formData.values());
+    // form.addEventListener('submit', event => {
+    //     event.preventDefault();
+    //     const formData = new FormData(form);
+    //     const choiceIds = Array.from(formData.values());
 
-        fetch('/api/submit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ choice_ids: choiceIds })
-        })
-        .then(response => response.json())
-        .then(data => {
+    //     fetch('/api/submit', {
+    //         method: 'POST',
+    //         headers: { 'Content-Type': 'application/json' },
+    //         body: JSON.stringify({ choice_ids: choiceIds })
+    //     })
+    //     .then(response => response.json())
+    //     .then(data => {
+    //         window.location.href = `/results?submission_id=${data.submission_id}`;
+    //     });
+    // });
+});
+
+document.getElementById('quiz-form').addEventListener('submit', event => {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+    const choiceIds = Array.from(formData.values());
+
+    fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ choice_ids: choiceIds })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
             window.location.href = `/results?submission_id=${data.submission_id}`;
-        });
-    });
+        } else {
+            alert('There was an error submitting your quiz. Please try again.');
+        }
+    })
+    .catch(error => console.error('Error submitting quiz:', error));
 });
