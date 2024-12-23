@@ -124,3 +124,4 @@ def get_results():
         })
 
     return jsonify({'results': response})
+
