@@ -95,7 +95,7 @@ def submit_responses():
     db.session.add(submission)
     db.session.commit()
 
-    return {"committee_info": infos, "submission_id": submission.id}, 200
+    return {"success": True, "committee_info": infos, "submission_id": submission.id}, 200
 
 
 @routes.route('/api/results', methods=['GET'])
