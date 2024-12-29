@@ -12,7 +12,7 @@ def index():
 def quiz():
     return render_template('quiz.html')
 
-@routes.route('/result', methods=['GET'])
+@routes.route('/results', methods=['GET'])
 def results():
     return render_template('results.html')
 
@@ -101,27 +101,27 @@ def submit_responses():
 @routes.route('/api/results', methods=['GET'])
 def get_results():
     submission_id = request.args.get('submission_id')
+    
+    # Fetch the submission
     submission = Submission.query.get(submission_id)
-
     if not submission:
         return jsonify({'error': 'Submission not found'}), 404
 
-    results = sorted(
-        submission.scores.items(),
-        key=lambda item: item[1],
-        reverse=True
-    )
+    # Use the precomputed results from the submission
+    results = submission.results
 
+    # Format the response
     response = []
-    for committee, score in results[:3]:  # Top 3 committees
-        committee_obj = Committee.query.filter_by(name=committee).first()
-        response.append({
-            'committee_name': committee_obj.name,
-            'percentage': round(score / sum(submission.scores.values()) * 100, 2),
-            'difficulty': committee_obj.difficulty,
-            'topics': committee_obj.topics,
-            'link': committee_obj.link
-        })
+    for committee_name, details in results.items():
+        committee_obj = Committee.query.filter_by(name=committee_name).first()
+        if committee_obj:
+            response.append({
+                'committee_name': committee_obj.name,
+                'percentage': details['percentage'],
+                'difficulty': committee_obj.difficulty_level,
+                'topics': [committee_obj.topic_1, committee_obj.topic_2],
+                'link': committee_obj.link,
+                'image_url': committee_obj.image_url  # Additional fields for frontend display
+            })
 
     return jsonify({'results': response})
-
