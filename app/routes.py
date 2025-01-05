@@ -86,7 +86,9 @@ def submit_responses():
             "image_url": comm.image_url,
             "difficulty_level": comm.difficulty_level,
             "topics": [comm.topic_1, comm.topic_2],
+            "full_name": comm.full_name
         }
+    
     submission = Submission(
         user_identifier=user_identifier,
         choices=choice_ids,
@@ -110,9 +112,15 @@ def get_results():
     # Use the precomputed results from the submission
     results = submission.results
 
+    sorted_results = sorted(
+        results.items(), 
+        key=lambda item: item[1]['weight'], 
+        reverse=True
+    )
+
     # Format the response
     response = []
-    for committee_name, details in results.items():
+    for committee_name, details in sorted_results[:3]:  # Top 3 only
         committee_obj = Committee.query.filter_by(name=committee_name).first()
         if committee_obj:
             response.append({
@@ -121,7 +129,8 @@ def get_results():
                 'difficulty': committee_obj.difficulty_level,
                 'topics': [committee_obj.topic_1, committee_obj.topic_2],
                 'link': committee_obj.link,
-                'image_url': committee_obj.image_url  # Additional fields for frontend display
+                'image_url': committee_obj.image_url, 
+                'full_name': committee_obj.full_name
             })
 
     return jsonify({'results': response})

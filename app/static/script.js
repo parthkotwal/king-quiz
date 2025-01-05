@@ -1,68 +1,113 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const questionsContainer = document.getElementById('questions-container')
-    const form = document.getElementById('form')
+document.addEventListener("DOMContentLoaded", () => {
+    const questionContainer = document.getElementById("question-container");
+    const prevButton = document.getElementById("prev-button");
+    const nextButton = document.getElementById("next-button");
+    const submitButton = document.getElementById("submit-button");
 
-    fetch('/api/questions')
-        .then(response => response.json())
-        .then(data => {
-            data.questions.forEach(question => {
-                const questionDiv = document.createElement('div');
-                questionDiv.classList.add('question');
-                questionDiv.innerHTML = `<h3>${question.text}</h3>`;
+    let questions = [];
+    let currentQuestionIndex = 0;
+    const answers = {};
 
-                question.choices.forEach(choice => {
-                    const choiceInput = document.createElement('input');
-                    choiceInput.type = 'radio';
-                    choiceInput.name = `question_${question.id}`;
-                    choiceInput.value = choice.id;
+    // Fetch questions from the backend
+    fetch("/api/questions")
+        .then((response) => response.json())
+        .then((data) => {
+            questions = data.questions; // Assuming the API returns { questions: [...] }
+            renderQuestion();
+        })
+        .catch((error) => console.error("Error fetching questions:", error));
 
-                    const choiceLabel = document.createElement('label');
-                    choiceLabel.textContent = choice.text;
+    // Render the current question
+    function renderQuestion() {
+        const question = questions[currentQuestionIndex];
+        questionContainer.innerHTML = `
+            <h3>${question.text}</h3>
+            ${question.choices
+                .map(
+                    (choice) => `
+                <div class="choice" data-id="${choice.id}">
+                    ${choice.text}
+                </div>
+            `
+                )
+                .join("")}
+        `;
 
-                    questionDiv.appendChild(choiceInput);
-                    questionDiv.appendChild(choiceLabel);
-                    questionDiv.appendChild(document.createElement('br'));
-                });
+        // Highlight previously selected choice
+        const selectedChoiceId = answers[question.id];
+        if (selectedChoiceId) {
+            const choiceElement = document.querySelector(
+                `.choice[data-id="${selectedChoiceId}"]`
+            );
+            if (choiceElement) choiceElement.classList.add("selected");
+        }
 
-                questionsContainer.appendChild(questionDiv);
+        addChoiceListeners();
+        updateButtons();
+    }
+
+    // Add event listeners to choices
+    function addChoiceListeners() {
+        document.querySelectorAll(".choice").forEach((choice) => {
+            choice.addEventListener("click", () => {
+                // Deselect other choices and select the clicked one
+                document.querySelectorAll(".choice").forEach((el) =>
+                    el.classList.remove("selected")
+                );
+                choice.classList.add("selected");
+
+                // Save the answer
+                const questionId = questions[currentQuestionIndex].id;
+                answers[questionId] = choice.dataset.id;
+
+                updateButtons();
             });
         });
+    }
 
-    // form.addEventListener('submit', event => {
-    //     event.preventDefault();
-    //     const formData = new FormData(form);
-    //     const choiceIds = Array.from(formData.values());
+    // Update navigation buttons
+    function updateButtons() {
+        prevButton.disabled = currentQuestionIndex === 0;
+        nextButton.disabled =
+            currentQuestionIndex === questions.length - 1 ||
+            !answers[questions[currentQuestionIndex].id];
+        submitButton.disabled = questions.some(
+            (q) => !answers[q.id]
+        );
+    }
 
-    //     fetch('/api/submit', {
-    //         method: 'POST',
-    //         headers: { 'Content-Type': 'application/json' },
-    //         body: JSON.stringify({ choice_ids: choiceIds })
-    //     })
-    //     .then(response => response.json())
-    //     .then(data => {
-    //         window.location.href = `/results?submission_id=${data.submission_id}`;
-    //     });
-    // });
-});
-
-document.getElementById('quiz-form').addEventListener('submit', event => {
-    event.preventDefault();
-
-    const formData = new FormData(event.target);
-    const choiceIds = Array.from(formData.values());
-
-    fetch('/api/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ choice_ids: choiceIds })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            window.location.href = `/results?submission_id=${data.submission_id}`;
-        } else {
-            alert('There was an error submitting your quiz. Please try again.');
+    // Navigation button logic
+    prevButton.addEventListener("click", () => {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            renderQuestion();
         }
-    })
-    .catch(error => console.error('Error submitting quiz:', error));
+    });
+
+    nextButton.addEventListener("click", () => {
+        if (
+            currentQuestionIndex < questions.length - 1 &&
+            answers[questions[currentQuestionIndex].id]
+        ) {
+            currentQuestionIndex++;
+            renderQuestion();
+        }
+    });
+
+    submitButton.addEventListener("click", () => {
+        fetch("/api/submit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ choice_ids: Object.values(answers) }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.submission_id) {
+                    window.location.href = `/results?submission_id=${data.submission_id}`;
+                } else {
+                    alert("Error submitting quiz. Please try again.");
+                }
+            })
+            .catch((error) => console.error("Error submitting quiz:", error));
+    });
 });

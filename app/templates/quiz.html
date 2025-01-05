@@ -1,15 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}Quiz{% endblock %}
+{% block title %}KINGMUN Committee Quiz{% endblock %}
 
 {% block content %}
 <div class="quiz-container">
-    <form id="quiz-form">
-        <div id="questions-container"></div>
-        <button type="submit">Submit</button>
-        
-    </form>
+    <!-- <h2 id="quiz-title">Take the Quiz</h2> -->
+    <div id="question-container">
+        <!-- Questions will be dynamically injected here -->
+    </div>
+    <div class="quiz-navigation">
+        <button id="prev-button" class="nav-button" disabled>Previous</button>
+        <button id="next-button" class="nav-button">Next</button>
+        <button id="submit-button" class="nav-button" disabled>Submit</button>
+    </div>
 </div>
 <script src="{{ url_for('static', filename='script.js') }}"></script>
 {% endblock %}
-

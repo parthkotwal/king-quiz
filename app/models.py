@@ -15,6 +15,7 @@ class Committee(db.Model):
     # __tablename__ = 'committees'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
+    full_name = db.Column(db.String(255), nullable=False)
     link = db.Column(db.String(200), nullable=True)
     image_url = db.Column(db.String(200), nullable=True)
     difficulty_level = db.Column(db.String(50), nullable=True)
