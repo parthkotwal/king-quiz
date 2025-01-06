@@ -118,7 +118,7 @@ def get_results():
         reverse=True
     )
 
-    # Format the response
+    # Format response
     response = []
     for committee_name, details in sorted_results[:3]:  # Top 3 only
         committee_obj = Committee.query.filter_by(name=committee_name).first()

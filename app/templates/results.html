@@ -3,11 +3,14 @@
 {% block title %}Results{% endblock %}
 
 {% block content %}
-<div class="results-container">
-    <h2>Your Results</h2>
-    <div id="results-content"></div>
-    <button onclick="window.location.href='{{ url_for('routes.index') }}'">Take Quiz Again</button>
+<div class="content-wrapper">
+    <div class="results-container">
+        <h2>Your Results</h2>
+        <div id="results-content"></div>
+        <button class="quiz-again-btn" onclick="window.location.href='{{ url_for('routes.index') }}'">Take Quiz Again</button>
+    </div>
 </div>
+
 <script src="{{ url_for('static', filename='script.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -18,23 +21,29 @@
             .then(response => response.json())
             .then(data => {
                 const resultsContent = document.getElementById('results-content');
-                resultsContent.innerHTML = `
-                    <h3>Top Committees</h3>
-                    <ul>
-                        ${data.results.map(result => `
-                            <li>
-                                <strong>${result.committee_name}</strong> - ${result.percentage}% fit<br>
-                                Difficulty: ${result.difficulty}<br>
-                                Topics: ${result.topics.join(', ')}<br>
-                                <a href="${result.link}" target="_blank">Learn More</a>
-                            </li>
-                        `).join('')}
-                    </ul>
-                `;
+                resultsContent.innerHTML = data.results.map((result, index) => `
+                    <div class="result-card">
+                        <div class="rank-container">
+                            <div class="rank">${index + 1}</div>
+                        </div>
+                        <div class="committee-container">
+                            <img class="committee-image" src="${result.image_url}" alt="${result.committee_name}">
+                            <div class="committee-details">
+                                <h3 class="committee-name">${result.committee_name}</h3>
+                                <p class="committee-full-name">${result.full_name}</p>
+                                <p><strong>Difficulty:</strong> ${result.difficulty}</p>
+                                <p><strong>Topics:</strong></p>
+                                <ul style="list-style-type: none;">
+                                    <li>${result.topics[0]}</li>
+                                    <li>${result.topics[1]}</li>
+                                </ul>
+                                <a class="learn-more-btn" href="${result.link}" target="_blank">Learn More</a>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
             })
             .catch(error => console.error('Error fetching results:', error));
     });
 </script>
 {% endblock %}
-
-
