@@ -15,7 +15,7 @@ header {
 }
 
 footer {
-    position: relative; /* Default positioning to avoid overlapping */
+    position: relative;
     bottom: 0;
     width: 100%;
     background-color: #2E4A20;
@@ -71,6 +71,7 @@ button:disabled {
     max-width: 800px;
     min-width: 400px;
     padding: 20px;
+    padding-bottom: 100px;
     display: flex;
     flex-direction: column;
     align-items: center;
