@@ -15,7 +15,8 @@ header {
 }
 
 footer {
-    position: relative;
+    position: fixed;
+    flex-shrink: 0;
     bottom: 0;
     width: 100%;
     background-color: #2E4A20;
@@ -25,10 +26,11 @@ footer {
 }
 
 .content-wrapper {
-    min-height: calc(100vh - 80px); /* Adjust based on your footer height */
+    min-height: 100vh;
+    /* padding-bottom: 80px; */
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    /* justify-content: space-between; */
 }
 
 button {
@@ -62,7 +64,7 @@ button:disabled {
     background-color: #f9f9f9;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); */
 }
 
 .quiz-container {
@@ -70,12 +72,13 @@ button:disabled {
     margin: 0 auto;
     max-width: 800px;
     min-width: 400px;
-    padding: 20px;
-    padding-bottom: 100px;
+    padding: 20px 20px 80px;
+    /* padding-bottom: 100px; */
     display: flex;
+    flex: 1 0 auto;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
 }
 
 #question-container {
@@ -107,13 +110,16 @@ button:disabled {
 
 .choice {
     display: block;
+    max-width: 600px;
     padding: 15px;
-    margin: 10px auto;
+    margin: 15px auto;
     background-color: #f9f9f9;
     border: 2px solid transparent;
     border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.3s, border-color 0.3s;
+    /* transition: background-color 0.3s, border-color 0.3s; */
+    transform: translateY(0);
+    transition: transform 0.2s, background-color 0.3s, border-color 0.3s;
 }
 .choice:hover {
     background-color: #eef4e6;
@@ -211,7 +217,7 @@ button:disabled {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    /* justify-content: space-between; */
 }
 
 .committee-name {
@@ -247,7 +253,7 @@ button:disabled {
 
 /* Learn More Button */
 .learn-more-btn {
-    align-self: flex-start;
+    align-self: flex-start center;
     margin-top: 10px;
     padding: 8px 12px;
     background-color: #2E4A20;
@@ -278,4 +284,9 @@ button:disabled {
 
 .quiz-again-btn:hover {
     background-color: #3a5a27;
+}
+
+body, html {
+    /* height: 0%; */
+    margin: 0;
 }

@@ -10,11 +10,11 @@ def index():
 
 @routes.route('/quiz', methods=['GET'])
 def quiz():
-    return render_template('quiz.html')
+    return render_template('quizz.html')
 
 @routes.route('/results', methods=['GET'])
 def results():
-    return render_template('results.html')
+    return render_template('resultss.html')
 
 
 @routes.route('/api/questions', methods=['GET'])
@@ -126,7 +126,7 @@ def get_results():
             response.append({
                 'committee_name': committee_obj.name,
                 'percentage': details['percentage'],
-                'difficulty': committee_obj.difficulty_level,
+                'difficulty_level': committee_obj.difficulty_level,
                 'topics': [committee_obj.topic_1, committee_obj.topic_2],
                 'link': committee_obj.link,
                 'image_url': committee_obj.image_url, 

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}KINGMUN Committee Quiz{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="progress-container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-text">
+            Question <span id="current-question">1</span> of <span id="total-questions">0</span>
+        </div>
+    </div>
+
+    <div class="quiz-container">
+        <div id="question-container">
+            <!-- Questions will be dynamically injected here -->
+        </div>
+        <div class="quiz-navigation">
+            <button id="prev-button" class="nav-button" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M15.293 3.293 6.586 12l8.707 8.707 1.414-1.414L9.414 12l7.293-7.293-1.414-1.414z"/></svg>
+            </button>
+            <button id="next-button" class="nav-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/></svg>
+            </button>
+            <button id="submit-button" class="nav-button" disabled>Submit</button>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='script2.js') }}"></script>
+{% endblock %}
