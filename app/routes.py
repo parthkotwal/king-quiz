@@ -85,7 +85,7 @@ def submit_responses():
             "link": comm.link,
             "image_url": comm.image_url,
             "difficulty_level": comm.difficulty_level,
-            "topics": [comm.topic_1, comm.topic_2],
+            "topics": [topic for topic in [comm.topic_1, comm.topic_2] if topic],
             "full_name": comm.full_name
         }
     
@@ -127,7 +127,7 @@ def get_results():
                 'committee_name': committee_obj.name,
                 'percentage': details['percentage'],
                 'difficulty_level': committee_obj.difficulty_level,
-                'topics': [committee_obj.topic_1, committee_obj.topic_2],
+                "topics": [topic for topic in [committee_obj.topic_1, committee_obj.topic_2] if topic],
                 'link': committee_obj.link,
                 'image_url': committee_obj.image_url, 
                 'full_name': committee_obj.full_name
